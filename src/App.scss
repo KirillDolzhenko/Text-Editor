@@ -54,6 +54,11 @@ button>svg {
     }
 }
 
+.container {
+  max-width: 500px;
+  padding: 0 10px;
+}
+
 ul {
     height: 100%;
     list-style: none;
@@ -144,6 +149,7 @@ ul {
 }
 
 .preview {
+  word-break: break-all;
   margin-top: 10px;
   padding: 1rem;
   width: calc(100% - 2rem);

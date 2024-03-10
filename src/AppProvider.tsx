@@ -7,14 +7,13 @@ export const AppContext = createContext<IContext>({
   setTexts: () => {},
 });
 
-interface Props {
-  children?: React.ReactNode;
-  // any props that come into the component
-}
-
 export interface IElement {
   id: number;
   content: string;
+}
+
+interface Props {
+  children?: React.ReactNode;
 }
 
 interface IContext {

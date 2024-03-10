@@ -35,7 +35,6 @@ export function TextList() {
           className="delete"
           onClick={() => {
             deleteText(el.id);
-            console.log(parse(el.content));
           }}
         >
           x
@@ -43,8 +42,6 @@ export function TextList() {
       </li>
     );
   });
-
-  console.log(22222, textsElements);
 
   return (
     <>

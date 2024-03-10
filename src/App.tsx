@@ -5,10 +5,10 @@ import { Preview } from "./components/Preview/Preview";
 
 export function App() {
   return (
-    <>
+    <div className="container">
       <EditPanel></EditPanel>
       <Preview></Preview>
       <TextList></TextList>
-    </>
+    </div>
   );
 }
