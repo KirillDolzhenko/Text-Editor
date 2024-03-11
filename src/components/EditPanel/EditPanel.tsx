@@ -7,117 +7,53 @@ import {
 } from "react";
 import { AppContext } from "../../AppProvider";
 import "./../../App.scss";
-import { APIText } from "../../api/api";
+import { editText } from "../../functions/editText";
+import { useEffectLastKey } from "../../functions/useEffectLastKey";
+import {
+  checkingCombinations,
+  listenKeys,
+  removeKeys,
+} from "../../functions/checking";
+import { sendText } from "../../functions/sendText";
 
 export function EditPanel(): JSX.Element {
   const { text, texts, setText, setTexts } = useContext(AppContext);
   const [keys, setKeys] = useState<string[]>([]);
   const [lastKey, setLastKey] = useState<string | null>(null);
 
-  console.log(keys, lastKey);
+  const textareaRef = useRef<HTMLTextAreaElement>(null!);
 
   const arrayOfEdit: string[] = ["u", "i", "b", "alt"];
 
-  const sendText = async () => {
-    let id = texts?.length
-      ? String(Number(texts[texts?.length - 1].id) + 1)
-      : "1";
+  const editTextEditPanel = (type: string) =>
+    editText(type, textareaRef, setText);
+  const listenKeysEditPanel = (e: KeyboardEvent) =>
+    listenKeys(e, keys, setKeys, setLastKey);
+  const removeKeysEditPanel = (e: KeyboardEvent) =>
+    removeKeys(e, keys, setKeys, setLastKey);
 
-    await APIText.putText(textareaRef.current.value, id);
-
-    setText("");
-
-    const response = await APIText.getTexts();
-
-    setTexts(response.data);
-  };
-
-  const editText = (type: string) => {
-    function dec(type: string, text: string) {
-      return `<${type}>${text}</${type}>`;
-    }
-
-    let left = textareaRef.current.value.slice(
-      0,
-      textareaRef.current.selectionStart
-    );
-    let middle = dec(
-      type,
-      textareaRef.current.value.slice(
-        textareaRef.current.selectionStart,
-        textareaRef.current.selectionEnd
-      )
-    );
-    let right = textareaRef.current.value.slice(
-      textareaRef.current.selectionEnd
-    );
-
-    setText(left + middle + right);
-  };
+  useEffectLastKey(
+    arrayOfEdit,
+    lastKey,
+    keys,
+    editTextEditPanel,
+    checkingCombinations
+  );
 
   useEffect(() => {
-    if (!lastKey) return;
-
-    if (arrayOfEdit.includes(lastKey?.toLowerCase())) {
-      console.log(1);
-      for (let i: number = 0; i < arrayOfEdit.length - 1; i++) {
-        console.log(keys, arrayOfEdit[i]);
-        if (checkingCombinations(keys, "alt", arrayOfEdit[i])) {
-          console.log(3, i);
-          editText(arrayOfEdit[i]);
-          break;
-        }
-      }
-    }
-  }, [lastKey]);
-
-  function checkingCombinations(
-    keys: string[],
-    key1: string,
-    key2: string
-  ): Boolean {
-    console.log(
-      keys.includes(key1.toLowerCase()) && keys.includes(key2.toLowerCase())
-    );
-    return (
-      keys.includes(key1.toLowerCase()) && keys.includes(key2.toLowerCase())
-    );
-  }
-
-  const listenKeys = (e: KeyboardEvent): void => {
-    if (e.repeat) return;
-
-    if (!keys.includes(e.key.toLowerCase())) {
-      setKeys([...keys, e.key.toLowerCase()]);
-      setLastKey(e.key.toLowerCase());
-    }
-  };
-
-  const removeKeys = (e: KeyboardEvent): void => {
-    setLastKey(null);
-    setKeys([...keys.filter((el) => el.toLowerCase() != e.key.toLowerCase())]);
-  };
-
-  useEffect(() => {
-    document.addEventListener("keydown", listenKeys);
-    document.addEventListener("keyup", removeKeys);
+    document.addEventListener("keydown", listenKeysEditPanel);
+    document.addEventListener("keyup", removeKeysEditPanel);
 
     return () => {
-      document.removeEventListener("keydown", listenKeys);
-      document.removeEventListener("keyup", removeKeys);
+      document.removeEventListener("keydown", listenKeysEditPanel);
+      document.removeEventListener("keyup", removeKeysEditPanel);
     };
   }, [keys]);
 
   useLayoutEffect(() => {
-    document.removeEventListener("keydown", removeKeys);
-    document.removeEventListener("keyup", removeKeys);
+    document.removeEventListener("keydown", listenKeysEditPanel);
+    document.removeEventListener("keyup", removeKeysEditPanel);
   }, []);
-
-  const changeInputText = () => {
-    setText(textareaRef.current.value);
-  };
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null!);
 
   return (
     <>
@@ -127,7 +63,7 @@ export function EditPanel(): JSX.Element {
           <textarea
             ref={textareaRef}
             value={text}
-            onChange={changeInputText}
+            onChange={() => setText(textareaRef.current.value)}
             className="inputBlock"
             spellCheck="false"
           ></textarea>
@@ -148,7 +84,7 @@ export function EditPanel(): JSX.Element {
                 <li>
                   <button
                     onClick={() => {
-                      editText("u");
+                      editTextEditPanel("u");
                     }}
                   >
                     <svg className="stroke">
@@ -159,7 +95,7 @@ export function EditPanel(): JSX.Element {
                 <li>
                   <button
                     onClick={() => {
-                      editText("b");
+                      editTextEditPanel("b");
                     }}
                   >
                     <svg>
@@ -170,7 +106,7 @@ export function EditPanel(): JSX.Element {
                 <li>
                   <button
                     onClick={() => {
-                      editText("i");
+                      editTextEditPanel("i");
                     }}
                   >
                     <svg className="stroke">
@@ -184,7 +120,7 @@ export function EditPanel(): JSX.Element {
               <button
                 className="btn"
                 onClick={() => {
-                  sendText();
+                  sendText(texts, textareaRef, setText, setTexts);
                 }}
               >
                 Send

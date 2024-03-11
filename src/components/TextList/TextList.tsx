@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { memo, useContext, useEffect } from "react";
 import "./../../App.scss";
 import styles from "./TextList.module.scss";
 import { AppContext } from "../../AppProvider";
@@ -10,7 +10,7 @@ import parse from "html-react-parser";
 //   text: string
 // }
 
-export function TextList() {
+function TextList() {
   const { texts, setTexts } = useContext(AppContext);
 
   useEffect(() => {
@@ -54,3 +54,5 @@ export function TextList() {
     </>
   );
 }
+
+export const TextListMemo = memo(TextList);
